@@ -13,8 +13,13 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as ProfileImport } from './routes/profile'
+import { Route as LoginImport } from './routes/login'
+import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as PostsIndexImport } from './routes/posts/index'
 import { Route as PostsPostIdImport } from './routes/posts/$postId'
+import { Route as AuthenticatedSettingsImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedDashboardImport } from './routes/_authenticated/dashboard'
 
 // Create Virtual Routes
 
@@ -28,6 +33,23 @@ const AboutLazyRoute = AboutLazyImport.update({
   path: '/about',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/about.lazy').then((d) => d.Route))
+
+const ProfileRoute = ProfileImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LoginRoute = LoginImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AuthenticatedRoute = AuthenticatedImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexLazyRoute = IndexLazyImport.update({
   id: '/',
@@ -47,6 +69,18 @@ const PostsPostIdRoute = PostsPostIdImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AuthenticatedSettingsRoute = AuthenticatedSettingsImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedDashboardRoute = AuthenticatedDashboardImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -58,12 +92,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedImport
+      parentRoute: typeof rootRoute
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginImport
+      parentRoute: typeof rootRoute
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileImport
+      parentRoute: typeof rootRoute
+    }
     '/about': {
       id: '/about'
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutLazyImport
       parentRoute: typeof rootRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsImport
+      parentRoute: typeof AuthenticatedImport
     }
     '/posts/$postId': {
       id: '/posts/$postId'
@@ -84,16 +153,40 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
+  '': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/about': typeof AboutLazyRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/posts': typeof PostsIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
+  '': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/about': typeof AboutLazyRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/posts': typeof PostsIndexRoute
 }
@@ -101,22 +194,58 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexLazyRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/about': typeof AboutLazyRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/posts/': typeof PostsIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/posts/$postId' | '/posts'
+  fullPaths:
+    | '/'
+    | ''
+    | '/login'
+    | '/profile'
+    | '/about'
+    | '/dashboard'
+    | '/settings'
+    | '/posts/$postId'
+    | '/posts'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/posts/$postId' | '/posts'
-  id: '__root__' | '/' | '/about' | '/posts/$postId' | '/posts/'
+  to:
+    | '/'
+    | ''
+    | '/login'
+    | '/profile'
+    | '/about'
+    | '/dashboard'
+    | '/settings'
+    | '/posts/$postId'
+    | '/posts'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/login'
+    | '/profile'
+    | '/about'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/settings'
+    | '/posts/$postId'
+    | '/posts/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  ProfileRoute: typeof ProfileRoute
   AboutLazyRoute: typeof AboutLazyRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
   PostsIndexRoute: typeof PostsIndexRoute
@@ -124,6 +253,9 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LoginRoute: LoginRoute,
+  ProfileRoute: ProfileRoute,
   AboutLazyRoute: AboutLazyRoute,
   PostsPostIdRoute: PostsPostIdRoute,
   PostsIndexRoute: PostsIndexRoute,
@@ -140,6 +272,9 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/_authenticated",
+        "/login",
+        "/profile",
         "/about",
         "/posts/$postId",
         "/posts/"
@@ -148,8 +283,29 @@ export const routeTree = rootRoute
     "/": {
       "filePath": "index.lazy.tsx"
     },
+    "/_authenticated": {
+      "filePath": "_authenticated.tsx",
+      "children": [
+        "/_authenticated/dashboard",
+        "/_authenticated/settings"
+      ]
+    },
+    "/login": {
+      "filePath": "login.tsx"
+    },
+    "/profile": {
+      "filePath": "profile.tsx"
+    },
     "/about": {
       "filePath": "about.lazy.tsx"
+    },
+    "/_authenticated/dashboard": {
+      "filePath": "_authenticated/dashboard.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/settings": {
+      "filePath": "_authenticated/settings.tsx",
+      "parent": "/_authenticated"
     },
     "/posts/$postId": {
       "filePath": "posts/$postId.tsx"

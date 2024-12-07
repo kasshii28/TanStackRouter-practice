@@ -1,8 +1,11 @@
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import './App.css';
 import { routeTree } from "./routeTree.gen";
-
-const router = createRouter({ routeTree: routeTree });
+import { useAuth } from "./hooks/useAuth";
+const router = createRouter({ 
+  routeTree: routeTree, 
+  context: {authentication: undefined! } 
+});
 
 declare module '@tanstack/react-router' {
   interface Register {
@@ -11,5 +14,6 @@ declare module '@tanstack/react-router' {
 }
 
 export default function App() {
-  return <RouterProvider router={router} />
+  const authentication = useAuth()
+  return <RouterProvider router={router} context={{authentication}}/>
 }

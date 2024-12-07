@@ -1,14 +1,36 @@
-import { createRootRoute, Link, Outlet } from '@tanstack/react-router';
+import { createRootRouteWithContext, Link, Outlet } from '@tanstack/react-router';
 import { Fragment } from 'react/jsx-runtime';
+import { AuthContext } from '../hooks/useAuth';
 
-export const Route = createRootRoute({
+type RouterContext = {
+    authentication: AuthContext;
+}
+export const Route = createRootRouteWithContext<RouterContext>()({
     component: () => (
         <Fragment>
-            <div>
-                <Link to="/">Home</Link>{' '}
-                <Link to="/about">About</Link> {' '}
-                <Link to="/posts">Posts</Link>
-            </div>
+            <ul>
+                <li>
+                    <Link to="/">Home</Link>{' '}
+                </li>
+                <li>
+                    <Link to="/about">About</Link> {' '}
+                </li>
+                <li>
+                    <Link to="/posts">Posts</Link>
+                </li>
+                <li>
+                    <Link to="/login">Login</Link>
+                </li>
+                <li>
+                    <Link to="/profile">Proifile</Link>
+                </li>
+                <li>
+                    <Link to="/dashboard">DashBoard</Link>
+                </li>
+                <li>
+                    <Link to="/settings">Settings</Link>
+                </li>
+            </ul>
             <hr/>
             <Outlet/>
         </Fragment>
